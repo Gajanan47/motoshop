@@ -1,0 +1,10 @@
+@import 'Tailwindcss';
+
+@theme {
+  --color-bg: #0f1117;
+  --color-surface: #181c27;
+  --color-card: #1e2334;
+  --color-border: #2a2f45;
+  --color-orange: #f97316;
+  --color-orange-dim: #c2540a;
+}
