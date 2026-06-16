@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { useCart } from "../context/CartContext"
-
+import { placeOrder } from "../api/orders"
 export default function Checkout() {
   const { cart, cartTotal, clearCart } = useCart()
   const navigate = useNavigate()
@@ -42,13 +42,29 @@ export default function Checkout() {
         contact: form.phone,
       },
       theme: { color: "#f97316" },
-      handler: function (response) {
-        setLoading(false)
-        setPaid(true)
-        setStep(1)
-        clearCart()
-        
-      },
+
+handler: async function (response) {
+  try {
+    // save order to database after successful payment
+    await placeOrder({
+      customerName: form.name,
+      customerEmail: form.email,
+      customerPhone: form.phone,
+      deliveryAddress: form.address,
+      items: cart,
+      total: cartTotal,
+      gst: gst,
+    })
+  } catch (err) {
+    console.log("Order save failed:", err.message)
+    // payment was done so still show success
+  }
+
+  setLoading(false)
+  setPaid(true)
+  setStep(1)
+  clearCart()
+},
       modal: {
         ondismiss: function () {
           setLoading(false)

@@ -16,10 +16,15 @@ export default function ProductCard({ product}) {
                 "☆".repeat(5 - Math.round(product.rating))
 
   return (
-    <div className="bg-[white] border border-[#2a2f45] rounded-xl overflow-hidden hover:border-orange-500 hover:-translate-y-1 transition-all duration-200">
+    <div className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden hover:border-orange-500 hover-shadow-xl hover:-translate-y-1 transition-all duration-200">
 
       
-      <div className="bg-[white] h-28 flex items-center justify-center relative border-b border-[#2a2f45]">
+      <div className=" relative
+  h-48
+  bg-gradient-to-b
+  from-slate-50
+  to-white
+  flex items-center justify-center">
         <span className="text-5xl">{product.type === 2 ? <img src={product.image} alt={product.name}
   className="w-full h-full object-contain p-2"
 /> : <img src={product.image} alt={product.name}/>} </span>
@@ -52,10 +57,15 @@ export default function ProductCard({ product}) {
           {[
             product.type === 2 ? "2W" : "4W",
             product.fuel === "Electric" ? "EV" : `${product.cc}cc`,
-            product.use
-          ].map((spec) => (
-            <span key={spec} className="bg-[slate-200] border border-[#2a2f45] text-red-400 text-[10px] px-2 py-0.5 rounded-full">
-              {spec}
+            product.use_case
+          ].map((spec, index) => (
+            <span key={index} className="px-3 py-1
+                                          rounded-full
+                                          text-xs
+                                          font-medium
+                                          bg-slate-100
+                                          text-slate-700">
+                      {spec}
             </span>
           ))}
         </div>

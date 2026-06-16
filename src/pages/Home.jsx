@@ -1,12 +1,11 @@
-import { useState, useMemo } from "react"
-import { products } from "../data/products"
+import { useState, useEffect, useMemo } from "react"
+import { fetchProducts } from "../api/products"
 import Navbar from "../components/Navbar"
 import Hero from "../components/Hero"
+import SlideBar from "../components/SlideBar"
 import ProductGrid from "../components/ProductGrid"
-import Slidebar from "../components/SlideBar"
 import CartModal from "../components/CartModal"
 import FeedbackModal from "../components/FeedbackModal"
-
 
 const defaultFilters = {
   type: "all",
@@ -17,41 +16,85 @@ const defaultFilters = {
   use: "all",
 }
 
-function App() {
+export default function Home() {
+  const [products, setProducts] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [filters, setFilters] = useState(defaultFilters)
+
+  // fetch products from backend on page load
+  useEffect(() => {
+    async function loadProducts() {
+      try {
+        const res = await fetchProducts()
+        setProducts(res.data.data)  // { success: true, data: [...] }
+      } catch (err) {
+        setError("Failed to load products. Please try again.")
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadProducts()
+  }, [])
 
   const filtered = useMemo(() => {
     return products.filter((p) => {
       if (filters.type !== "all" && String(p.type) !== filters.type) return false
       if (filters.cc !== "all") {
         const cc = parseInt(filters.cc)
-        if (cc === 150 && p.cc > 150)             return false
+        if (cc === 150 && p.cc > 150) return false
         if (cc === 250 && (p.cc < 151 || p.cc > 250)) return false
         if (cc === 500 && (p.cc < 251 || p.cc > 500)) return false
-        if (cc === 501 && p.cc <= 500)            return false
+        if (cc === 501 && p.cc <= 500) return false
       }
       if (filters.brand !== "all" && p.company !== filters.brand) return false
-      if (p.price > filters.price)                return false
+      if (p.price > filters.price) return false
       if (filters.fuel !== "all" && p.fuel !== filters.fuel) return false
-      if (filters.use !== "all" && p.use !== filters.use)   return false
+      if (filters.use !== "all" && p.use_case !== filters.use) return false
       return true
     })
-  }, [filters])
+  }, [filters, products])
+
+  // loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-4xl mb-3">🏍</div>
+          <p className="text-slate-500">Loading vehicles...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-slate-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-4xl mb-3">⚠️</div>
+          <p className="text-red-500">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-orange-500 text-white rounded-lg"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    
-      <div className="min-h-screen bg-[slate-100] text-black">
-        <Navbar />
-        <Hero />
-        <div className="flex">
-          <Slidebar filters={filters} setFilters={setFilters}/>
-          <ProductGrid products={filtered} />
-        </div>
-        <CartModal />
-        <FeedbackModal />
+    <div className="min-h-screen bg-slate-100 text-slate-900">
+      <Navbar />
+      <Hero />
+      <div className="flex">
+        <SlideBar filters={filters} setFilters={setFilters} />
+        <ProductGrid products={filtered} />
       </div>
-    
+      <CartModal />
+      <FeedbackModal />
+    </div>
   )
 }
-
-export default App
