@@ -32,20 +32,20 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 flex items-center justify-center p-5">
-      <div className="bg-white rounded-2xl shadow-sm w-full max-w-sm p-8">
+    <div className="min-h-screen bg-slate-100 flex items-center justify-center  p-4 sm:p-5">
+      <div className="bg-white rounded-2xl shadow-sm w-full max-w-sm p-6 sm:p-8">
 
         {/* Logo */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6 sm:mb-8">
           <h1 className="text-2xl font-medium tracking-tight">
             MOTO<span className="text-orange-500">SHOP</span>
           </h1>
-          <p className="text-slate-400 text-sm mt-1">Admin Panel</p>
+          <p className="text-slate-400 text-xs sm:text-sm mt-1">Admin Panel</p>
         </div>
 
         {/* Error message */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-500 text-sm rounded-xl px-4 py-3 mb-4">
+          <div className="bg-red-50 border border-red-200 text-red-500 text-xs sm:text-sm rounded-xl px-4 py-3 mb-4">
             {error}
           </div>
         )}
@@ -85,13 +85,13 @@ export default function AdminLogin() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 bg-orange-500 hover:bg-orange-600 disabled:bg-slate-200 disabled:text-slate-400 text-white font-semibold rounded-xl transition cursor-pointer"
+            className="w-full py-2.5 bg-orange-500 hover:bg-orange-600 disabled:bg-slate-200 disabled:text-slate-400 text-white font-semibold rounded-xl transition cursor-pointer shadow-xs"
           >
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
-        <p className="text-center text-xs text-slate-400 mt-6">
+        <p className="text-center text-[10px] sm:text-xs text-slate-400 mt-6 tracking-wide">
           MotoShop Admin — restricted access
         </p>
       </div>

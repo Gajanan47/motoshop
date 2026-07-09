@@ -1,4 +1,4 @@
-import API from "./axios"
+import adminAPI from "./axios"
 
 // admin login
-export const adminLogin = (data) => API.post("/admin/login", data)
+export const adminLogin = (data) => adminAPI.post("/admin/login", data)

@@ -1,11 +1,9 @@
 import { useState, useEffect, useMemo } from "react"
 import { fetchProducts } from "../api/products"
-import Navbar from "../components/Navbar"
+import searchIcon from "../assets/search.png"
 import Hero from "../components/Hero"
 import SlideBar from "../components/SlideBar"
 import ProductGrid from "../components/ProductGrid"
-import CartModal from "../components/CartModal"
-import FeedbackModal from "../components/FeedbackModal"
 
 const defaultFilters = {
   type: "all",
@@ -14,6 +12,7 @@ const defaultFilters = {
   price: 30,
   fuel: "all",
   use: "all",
+  search: "",
 }
 
 export default function Home() {
@@ -38,7 +37,12 @@ export default function Home() {
   }, [])
 
   const filtered = useMemo(() => {
+     
     return products.filter((p) => {
+      if (filters.search.trim()) {
+  const q = filters.search.trim().toLowerCase()
+  if (!p.name.toLowerCase().includes(q) && !p.company.toLowerCase().includes(q)) return false
+}
       if (filters.type !== "all" && String(p.type) !== filters.type) return false
       if (filters.cc !== "all") {
         const cc = parseInt(filters.cc)
@@ -53,6 +57,7 @@ export default function Home() {
       if (filters.use !== "all" && p.use_case !== filters.use) return false
       return true
     })
+   
   }, [filters, products])
 
   // loading state
@@ -87,14 +92,46 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900">
-      <Navbar />
+      
       <Hero />
-      <div className="flex">
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-5 lg:px-6 pt-5">
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-3 sm:p-4">
+          <label htmlFor="vehicle-search" className="sr-only">
+            Search vehicles
+          </label>
+          <div className="relative">
+            <img
+              src={searchIcon}
+              alt=""
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none opacity-60"
+            />
+            <input
+              id="vehicle-search"
+              type="text"
+              value={filters.search}
+              onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+              placeholder="Search vehicles by name or brand..."
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-24 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-orange-400 transition"
+            />
+            {filters.search && (
+              <button
+                type="button"
+                onClick={() => setFilters(prev => ({ ...prev, search: "" }))}
+                className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-500 hover:bg-orange-50 hover:text-orange-500 transition"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto flex flex-col sm:flex-row px-4 sm:px-5 lg:px-6 pt-5">
         <SlideBar filters={filters} setFilters={setFilters} />
         <ProductGrid products={filtered} />
       </div>
-      <CartModal />
-      <FeedbackModal />
+      
     </div>
   )
 }

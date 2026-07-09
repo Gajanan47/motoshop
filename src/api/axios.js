@@ -1,15 +1,22 @@
 import axios from "axios"
 
-const API = axios.create({
-  baseURL: "http://localhost:5000/api",
-})
 
-API.interceptors.request.use((config) => {
-  const token = localStorage.getItem("adminToken")
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
+ const baseURL= import.meta.env.VITE_API_URL || "http://192.168.1.33:5000/api"
+
+
+export const userAPI = axios.create({ baseURL })
+userAPI.interceptors.request.use((config) => {
+  const token = localStorage.getItem("userToken")
+  if (token) config.headers.Authorization = `Bearer ${token}`
   return config
 })
 
-export default API
+export const adminAPI = axios.create({ baseURL })
+adminAPI.interceptors.request.use((config) => {
+  const token = localStorage.getItem("adminToken")
+  if (token) config.headers.Authorization = `Bearer ${token}`
+  return config
+})
+
+export default userAPI
+
