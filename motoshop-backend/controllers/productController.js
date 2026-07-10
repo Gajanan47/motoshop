@@ -151,10 +151,40 @@ const deleteProduct = async (req, res) => {
   }
 }
 
+const getSimilarProducts = async (req, res) => {
+  try{
+    const {id} = req.params
+    const [product] = await db.query("SELECT * FROM products WHERE id=?", [id])
+    if(product.length == 0){
+      return res.status(404).json({
+        success:false, message:"Product not found"
+      })  
+    } 
+    const current = product[0]
+    const [rows] = await db.query(`SELECT p.*, JSON_ARRAYAGG(pi.url) AS images 
+      FROM products p
+      LEFT JOIN product_images pi 
+      ON p.id = pi.product_id
+      WHERE p.id != ?
+      AND 
+     ( p.company = ? OR p.type = ? OR p.fuel = ?) 
+      GROUP BY p.id 
+      ORDER BY (p.company = ?) DESC, 
+      (p.type=?) DESC,
+      ABS(p.price - ?) ASC LIMIT 8 `, [id, current.company, current.type, current.fuel, current.company, current.type, current.price])
+
+      res.json({success: true, data:rows})
+  }
+  catch(err){
+    res.status(500).json({success: false, message:err.message})
+  }
+}
+
 module.exports = {
   getAllProducts,
   getProductById,
   addProduct,
   updateProduct,
-  deleteProduct
+  deleteProduct,
+  getSimilarProducts
 }

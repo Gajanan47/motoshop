@@ -11,3 +11,5 @@ export const updateProduct = (id, data) => adminAPI.put(`/products/${id}`, data)
 
 // delete product (admin)
 export const deleteProduct = (id) => adminAPI.delete(`/products/${id}`)
+
+export const getSimilarProducts = (id) => userAPI.get(`/products/similar/${id}`)

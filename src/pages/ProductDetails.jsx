@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { fetchProducts } from '../api/products'
 import { useCart } from '../context/CartContext'
-
+import SimilarProducts from '../components/SimilarProducts'
+import { getSimilarProducts } from '../api/products'
 import { useNavigate } from 'react-router-dom'
 const ProductDetails = () => {
   const { id } = useParams()
@@ -12,7 +13,7 @@ const ProductDetails = () => {
   const [selectedImage, setSelectedImage] = useState("")
   const [loading, setLoading] = useState(true)
   const [zoom, setZoom] = useState(false)
-  
+  const [similarProducts, setSimilarProducts] = useState([])
   const [position, setPosition] = useState({x : 0, y:0})
   const cartItem = product ? cart.find((item) => item.id === product.id) : null
   const qty = cartItem ? cartItem.qty : 0
@@ -23,6 +24,8 @@ const ProductDetails = () => {
         const res = await fetchProducts()
         const found = res.data.data.find((p) => p.id === Number(id))
         setProduct(found)
+        const similar =await getSimilarProducts(id)
+        setSimilarProducts( similar.data.data)
         setSelectedImage(found?.image)  // set first image as default
       } catch (err) {
         console.log("Error loading product:", err.message)
@@ -173,6 +176,7 @@ const ProductDetails = () => {
     </div>
 
     
+    <SimilarProducts products = {similarProducts}/>
   </>
   )
 }
