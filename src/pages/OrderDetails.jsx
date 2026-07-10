@@ -84,8 +84,8 @@ const navigate = useNavigate()
   return (
     <div className="min-h-screen bg-slate-100">
         <nav className="bg-white border-b border-slate-200 px-6 h-14 flex items-center justify-between sticky top-0 z-10">
-            <h1 className="text-lg font-medium">MOTO<span className="text-lg font-medium">SHOP</span>
-            <span className="text-sm font-normal ml-2 text-slate-400">Admin</span></h1>
+            <h1 className="sm:text-lg text-base  font-bold ">MOTO<span className="text-lg font-bold text-orange-500 ">SHOP</span>
+            <span className="text-xs font-normal ml-1 text-slate-400">Admin</span></h1>
 
             <button onClick={()=> navigate("/admin")}
                 className="text-sm px-3 py-1.5 border border-slate-200 rounded-lg text-slate-500 hover:border-orange-400 hover:text-orange-500 transition cursor-pointer">

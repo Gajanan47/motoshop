@@ -12,15 +12,15 @@ export default function Navbar() {
   return (
     <nav className="sticky top-0 z-50 bg-[white] border-b border-[black]px-3 sm:px-5 h-14 flex items-center justify-between">
       
-      <span onClick= {() => navigate('/') } className="text-lg text-bold font-medium tracking-tight cursor-pointer">
-        MOTO<span className="text-orange" >SHOP</span>
+      <span onClick= {() => navigate('/') } className="text-lg font-bold  tracking-tight cursor-pointer">
+        MOTO<span className="text-orange-500" >SHOP</span>
       </span>
 
       <div className="flex items-center gap-1.5 sm:gap-2">
-       <div className="relative">
+       <div className="relative" >
          { name ? (
-          <>
-          <button onClick={()=> setIsAccountOpen((prev)=>(!prev))}
+          <div onMouseEnter={()=>setIsAccountOpen(true)} onMouseLeave={()=>setIsAccountOpen(false)}>
+          <button 
             className="px-2 sm:px-3 py-1.5 text-left text-sm border border-slate-200 rounded-md hover:border-orange-500 max-w-35 sm:max-w-none transition">
             
           
@@ -32,7 +32,7 @@ export default function Navbar() {
   </button>
     
     {isAccountOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-lg z-50 overflow-hidden">
+        <div className="absolute right-0 mt-0 w-48 bg-white border border-slate-200 rounded-xl shadow-lg z-50 overflow-hidden" >
           <button
             onClick={() => {
               setIsAccountOpen(false)
@@ -63,7 +63,7 @@ export default function Navbar() {
               </div>
     )}
     
-  </>
+  </div>
   
   
 ) : (

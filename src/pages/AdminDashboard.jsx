@@ -219,7 +219,6 @@ export default function AdminDashboard() {
   const statusColors = {
     Confirmed: "bg-blue-100 text-blue-600",
     Processing: "bg-yellow-100 text-yellow-600",
-    Pending: "bg-orange-100 text-orange-600",
     Shipped: "bg-purple-100 text-purple-600",
     Delivered: "bg-green-100 text-green-600",
     Cancelled: "bg-red-100 text-red-600",
@@ -649,7 +648,6 @@ export default function AdminDashboard() {
                 >
                   <option value="all" > All </option>
                   <option value="Confirmed" > Confirmed </option>
-                  <option value="Pending" >Pending</option>
                   <option value="Processing" > Processing </option>
                   <option value="Shipped" > Shipped </option>
                   <option value="Delivered" > Delivered </option>
@@ -700,7 +698,6 @@ export default function AdminDashboard() {
                         >
                           <option>Confirmed</option>
                           <option>Processing</option>
-                          <option>Pending</option>
                           <option>Shipped</option>
                           <option>Delivered</option>
                           <option>Cancelled</option>

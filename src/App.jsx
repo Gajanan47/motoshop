@@ -17,6 +17,7 @@ import Profile from "./pages/Profile"
 import Addresses from "./pages/Addresses"
 import LoginSecurity from "./pages/LoginSecurity"
 import ReAuth from "./pages/ReAuth"
+import ChatBot from "./components/ChatBot"
 function App() {
   return (
     <CartProvider>
@@ -50,6 +51,7 @@ function App() {
           } />
         </Routes>
         <CartModal />
+        <ChatBot />
      
       </BrowserRouter>
     </CartProvider>

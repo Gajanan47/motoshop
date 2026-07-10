@@ -11,6 +11,9 @@ const ProductDetails = () => {
   const [product, setProduct] = useState()
   const [selectedImage, setSelectedImage] = useState("")
   const [loading, setLoading] = useState(true)
+  const [zoom, setZoom] = useState(false)
+  
+  const [position, setPosition] = useState({x : 0, y:0})
   const cartItem = product ? cart.find((item) => item.id === product.id) : null
   const qty = cartItem ? cartItem.qty : 0
   const navigate = useNavigate()
@@ -40,6 +43,14 @@ const ProductDetails = () => {
       ? [product.image]
       : []
 
+  const handleMouseMove = (e) =>{
+        const {left, top, height, width} =
+         e.target.getBoundingClientRect();
+         const x = ((e.clientX-left) / width) * 100;
+         const y = ((e.clientY-top)/height) * 100;
+         setPosition({x,y});
+  };    
+
   return (<>
 
     <div className="max-w-7xl mx-auto px-6 py-8">
@@ -51,8 +62,11 @@ const ProductDetails = () => {
           <div className="border rounded-xl p-4 bg-white">
             <img
               src={selectedImage}
+              onMouseMove={handleMouseMove}
+              onMouseEnter={()=>setZoom(true)}
+              onMouseLeave={()=>setZoom(false)}
               alt={product.name}
-              className="w-full h-100 object-contain"
+              className="w-full h-100 object-contain cursor-pointer"
             />
 
             {/* Thumbnail strip — only shows if multiple images */}
@@ -63,6 +77,7 @@ const ProductDetails = () => {
                     key={index}
                     src={img}
                     alt=""
+                    
                     onClick={() => setSelectedImage(img)}
                     className={`w-20 h-20 object-contain border rounded-lg cursor-pointer transition
                       ${selectedImage === img
@@ -74,17 +89,28 @@ const ProductDetails = () => {
               </div>
             )}
           </div>
+           
         </div>
-
+           
         {/* Right — Info */}
         <div className="flex flex-col gap-4">
           <div>
+           
             <p className="text-black uppercase text-sm tracking-wide">
               {product.company}
             </p>
             <h1 className="text-3xl font-bold text-slate-900 mt-1">
               {product.name}
             </h1>
+             {zoom && <div 
+                className='absolute top-8 left-[52%] w-150 h-150 border rounded-lg shadow-xl bg-white z-50' style = {{backgroundImage : `url(${selectedImage})`,
+               backgroundPosition: `${position.x}% ${position.y}%`,
+               backgroundRepeat: "no-repeat",
+                backgroundSize: '300%'
+              }}
+            >
+
+              </div>}
             <div className="flex items-center gap-2 mt-2 text-sm text-slate-500">
 
               <span className="text-orange-500">★ {product.rating}</span>
@@ -145,6 +171,8 @@ const ProductDetails = () => {
 
       </div>
     </div>
+
+    
   </>
   )
 }

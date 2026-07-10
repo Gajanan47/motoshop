@@ -8,7 +8,9 @@ dotenv.config()
 const app = express()
 
 app.use(cors({
-    origin: "http://192.168.1.33:5173",
+    
+    origin:
+    ["http://localhost:5173", "http://127.0.0.1:5173", "http://192.168.1.33:5173"],
     credentials: true
 }))
 app.use(express.json())
@@ -17,17 +19,20 @@ const productRoutes = require("./routes/productRoutes")
 const orderRoutes = require("./routes/orderRoutes")
 const adminRoutes = require("./routes/adminRoutes")
 const userRoutes = require('./routes/userRoutes')
+const chatbotRoutes = require('./routes/chatbotRoutes')
 app.use("/api/products", productRoutes)
 app.use("/api/orders", orderRoutes)
 app.use("/api/admin", adminRoutes)
 app.use("/api/addresses", require("./routes/addressRoutes"))
 app.use("/invoices", express.static(path.join(__dirname, "invoices")))
 
+app.use("/api/chatbot", require("./routes/chatbotRoutes"))
+
 app.get('/', (req, res) => {
     res.json({ message: "MotoShop backend is running" })
 })
 app.use("/api/users",userRoutes)
-const PORT = process.env.PORT || '0.0.0.0'
-app.listen(PORT, () => {
+const PORT = process.env.PORT || '5000'
+app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server is running on port ${PORT}`)
 })
