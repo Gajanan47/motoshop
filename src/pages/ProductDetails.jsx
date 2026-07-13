@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext'
 import SimilarProducts from '../components/SimilarProducts'
 import { getSimilarProducts } from '../api/products'
 import { useNavigate } from 'react-router-dom'
+import ReviewSection from '../components/ReviewSection'
 const ProductDetails = () => {
   const { id } = useParams()
   const { addToCart, cart, removeFromCart } = useCart()
@@ -177,6 +178,7 @@ const ProductDetails = () => {
 
     
     <SimilarProducts products = {similarProducts}/>
+    <ReviewSection productId = {id} />
   </>
   )
 }

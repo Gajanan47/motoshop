@@ -32,11 +32,12 @@ function App() {
           <Route path="/account/reauth" element={<ReAuth/>}/>
           <Route path="/account/login-security" element={<><Navbar/><LoginSecurity/></>}/>
           <Route path="/" element={
-            <ProtectedRoute>
+          <>
               <Navbar /><Home />
-              </ProtectedRoute>}
+              </>
+              }
             />
-          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/checkout" element={<ProtectedRoute> <Checkout /></ProtectedRoute>} />
           <Route path="/products/:id" element={<><Navbar /> <ProductDetails /></>} />
           <Route path="/admin/login" element={<> <AdminLogin /></>} />
           <Route path="/admin" element={

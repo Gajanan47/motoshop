@@ -90,8 +90,7 @@ export default function CartModal() {
             </>
           )}
         </div>
-
-        {/* Footer */}
+        
         {cart.length > 0 && (
           <div className="flex gap-3 px-4 sm:px-6 py-4 border-t border-slate-100 shrink-0 pb-6 sm:pb-4">
             <button

@@ -14,7 +14,7 @@ const SimilarProducts = ({products}) => {
 
         <div className='grid grid-cols-2 md:grid-cols-3 gap-2 lg:grid-cols-4'>
             {products.map(product => (
-                <div className='cursor-pointer shadow-inner shadow-black/20 relative  rounded-xl hover:shadow-orange-600 hover:shadow-inner  transition overfolw-hidden bg-white' key={product.id} onClick={()=>handleClick(product.id)}>
+                <div className='cursor-pointer shadow-inner shadow-black/20 relative  rounded-xl hover:shadow-orange-600 hover:shadow-inner  transition overfolw-hidden bg-slate-50' key={product.id} onClick={()=>handleClick(product.id)}>
                     <img src={product.image} className='h-52 w-full object-contain p-4'  />
                     <div className='p-4'>
                         <p className='text-xs text-grey-500 uppercase'>
