@@ -1,6 +1,22 @@
-import {useState} from "react"
+import {useState, useEffect} from "react"
+import { fetchProducts } from "../api/products"
 import { useCart } from "../context/CartContext"
 export default function Hero() {
+  const [products, setproducts] = useState([])
+  useEffect(() => {
+    async function loadProducts(){
+      try{
+        const data = await fetchProducts();
+        setproducts(data.data.data)
+
+      }catch(err){
+        console.log(err)
+      }
+    }
+    
+  loadProducts()
+    
+  }, [])
   
 
   

@@ -1,5 +1,8 @@
+import { useState } from "react";
 import { useCart } from "../context/CartContext"
-import {useNavigate} from "react-router-dom"
+import { useNavigate } from "react-router-dom"
+import { FaHeart, FaRegHeart } from "react-icons/fa";
+import { addWishlist, removeWishlist } from "../api/wishlist";
 const badgeStyle = {
   new: "bg-green-500/10 text-green-400 border border-green-500/30",
   hot: "bg-orange-500/10 text-orange-400 border border-orange-500/30",
@@ -8,12 +11,29 @@ const badgeStyle = {
 
 export default function ProductCard({ product }) {
   const { addToCart, cart, removeFromCart } = useCart()
+  const [isWishlisted, setIsWishlisted] = useState(product.isWishlisted || false)
 
   const cartItem = cart.find((item) => item.id === product.id)
   const qty = cartItem ? cartItem.qty : 0
-  const navigate=useNavigate()
+  const navigate = useNavigate()
   const stars = "★".repeat(Math.round(product.rating)) +
     "☆".repeat(5 - Math.round(product.rating))
+  const handleWishlist = async (e) => {
+    e.stopPropagation();
+
+    try {
+      if (isWishlisted) {
+        await removeWishlist(product.id);
+        setIsWishlisted(false);
+      } else {
+        await addWishlist(product.id);
+        setIsWishlisted(true);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
 
   return (
     <div className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden hover:border-orange-500 hover-shadow-xl hover:-translate-y-1 transition-all duration-200">
@@ -30,7 +50,18 @@ export default function ProductCard({ product }) {
             <span className={`absolute top-2 left-2 text-[10px] font-medium px-2 py-0.5 rounded-full ${badgeStyle[product.badge]}`}>
               {product.badge}
             </span>
+
           )}
+          <button
+            onClick={handleWishlist}
+            className="absolute top-2 right-2 w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center hover:scale-110 transition cursor-pointer"
+          >
+            {isWishlisted ? (
+              <FaHeart className="text-red-500 text-lg" />
+            ) : (
+              <FaRegHeart className="text-gray-500 text-lg" />
+            )}
+          </button>
         </div>
 
 
@@ -74,13 +105,13 @@ export default function ProductCard({ product }) {
             {qty === 0 ?
               (
                 <button
-                  onClick={(e) => {e.stopPropagation(); addToCart(product)}}
+                  onClick={(e) => { e.stopPropagation(); addToCart(product) }}
                   className="bg-orange-500 hover:bg-orange-600 text-white text-xs px-3 py-1.5 rounded-md transition cursor-pointer"
                 >
                   + ADD
                 </button>) : (<div className="flex items-center gap-2">
                   <button
-                    onClick={(e) => {e.stopPropagation(); removeFromCart(product.id)}}
+                    onClick={(e) => { e.stopPropagation(); removeFromCart(product.id) }}
                     className="w-6 h-6 rounded-md bg-slate-200 hover:bg-red-100 hover:text-red-500 text-slate-700 font-bold text-sm flex items-center justify-center transition cursor-pointer"
                   >
                     −
@@ -89,7 +120,7 @@ export default function ProductCard({ product }) {
                     {qty}
                   </span>
                   <button
-                    onClick={(p) =>{p.stopPropagation();  addToCart(product)}}
+                    onClick={(p) => { p.stopPropagation(); addToCart(product) }}
                     className="w-6 h-6 rounded-md bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm flex items-center justify-center transition cursor-pointer"
                   >
                     +

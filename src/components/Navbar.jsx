@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useCart } from "../context/CartContext"
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom"
-
+import {fetchProducts} from '../api/products'
 export default function Navbar() {
   const { cartCount, setIsCartOpen } = useCart()
   const [isAccountOpen, setIsAccountOpen] = useState(false)
   const [searchInput, setSearchInput] = useState("")
+  const [suggestions, setsuggestions] = useState([])
+  const [products, setproducts] = useState([])
   const navigate = useNavigate()
   const location = useLocation()
   const [searchParams] = useSearchParams()
@@ -23,6 +25,54 @@ export default function Navbar() {
     }
   }, [location])
 
+  useEffect(() => {
+  async function loadProducts() {
+    try {
+      const response = await fetchProducts();
+
+      // console.log("response =", response);
+      // console.log("response.data =", response.data);
+      // console.log("is array =", Array.isArray(response.data));
+
+      setproducts(response.data.data);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  loadProducts();
+}, []);
+
+// useEffect(() => {
+//   console.log("Products state =", products);
+//   console.log("Array?", Array.isArray(products));
+// }, [products]);
+
+  function handleSearchChange(e){
+    // console.log("called")
+    const value = e.target.value;
+    setSearchInput(value);
+
+    const words = value
+      .toLowerCase()
+      .trim()
+      .split(/\s+/);
+
+    
+    if(!value.trim()){
+      setsuggestions([])
+      return;
+    }
+    // console.log(products);
+    console.log("isArray:", Array.isArray(products));
+    const filtered = products.filter(product =>{
+        const searchable = `${product.company} ${product.name}`.toLowerCase()
+        return words.every(word=>
+          searchable.includes(word)
+        );
+    })
+    setsuggestions(filtered.slice(0,5)) 
+  }
   function handleSearch(e) {
     e.preventDefault()
     const q = searchInput.trim()
@@ -36,6 +86,7 @@ export default function Navbar() {
   function clearSearch() {
     setSearchInput("")
     if (isHomePage) navigate("/")
+      setsuggestions([])
   }
 
   return (
@@ -44,7 +95,7 @@ export default function Navbar() {
       {/* Logo */}
       <span
         onClick={() => { navigate('/'); setSearchInput("") }}
-        className="text-lg font-bold tracking-tight cursor-pointer shrink-0"
+        className="text-lg font-bold tracking-tight cursor-pointer shrink-0 "
       >
         MOTO<span className="text-orange-500">SHOP</span>
       </span>
@@ -56,10 +107,38 @@ export default function Navbar() {
           <input
             type="text"
             value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
+            onChange={(e)=>handleSearchChange(e)}
             placeholder="Search vehicles by name or brand..."
             className="w-full bg-slate-50 border border-slate-200 rounded-l-lg pl-4 pr-10 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-400 focus:bg-white transition h-9"
           />
+          {
+            suggestions.length > 0 && (
+              <div className="absolute left-0 top-full right-0 border border-gray-100
+               bg-white rounded-md shodaw-lg mt-1 z-50">
+                {suggestions.map(product=> (
+                  <div key={product.id}
+                  className='px-4 py-2 hover:bg-orange-50 cursor-pointer'
+                  onClick={()=>{navigate(`/products/${product.id}`);
+                           setsuggestions([]);
+                            setSearchInput(product.name); } 
+                  }
+                  >
+                    <div className='font-medium'>
+                      {product.name}
+                    </div>
+                    <div className='text-xs text-gray-500'>
+                      {product.company}
+                    </div>
+
+                </div>
+                ))
+                  
+                }
+                
+
+              </div>
+            )
+          }
           {searchInput && (
             <button
               type="button"
