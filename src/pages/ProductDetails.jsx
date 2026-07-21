@@ -6,9 +6,12 @@ import SimilarProducts from '../components/SimilarProducts'
 import { getSimilarProducts } from '../api/products'
 import { useNavigate } from 'react-router-dom'
 import ReviewSection from '../components/ReviewSection'
+import { FaHeart, FaRegHeart } from "react-icons/fa"
+import { useWishlist } from "../context/WishlistContext"
 const ProductDetails = () => {
   const { id } = useParams()
   const { addToCart, cart, removeFromCart } = useCart()
+  const { wishlistIds, toggleWishlist } = useWishlist()
 
   const [product, setProduct] = useState()
   const [selectedImage, setSelectedImage] = useState("")
@@ -18,6 +21,7 @@ const ProductDetails = () => {
   const [position, setPosition] = useState({x : 0, y:0})
   const cartItem = product ? cart.find((item) => item.id === product.id) : null
   const qty = cartItem ? cartItem.qty : 0
+  const isWishlisted = product ? wishlistIds.has(product.id) : false
   const navigate = useNavigate()
   useEffect(() => {
     async function load() {
@@ -36,6 +40,14 @@ const ProductDetails = () => {
     }
     load()
   }, [id])
+
+  const handleWishlist = () => {
+    if (!localStorage.getItem("userToken")) {
+      navigate("/login")
+      return
+    }
+    toggleWishlist(product)
+  }
 
   if (loading) return <p className="text-center mt-10 text-slate-400">Loading...</p>
   if (!product) return <p className="text-center mt-10 text-red-400">Product not found</p>
@@ -100,12 +112,26 @@ const ProductDetails = () => {
         <div className="flex flex-col gap-4">
           <div>
            
-            <p className="text-black uppercase text-sm tracking-wide">
-              {product.company}
-            </p>
-            <h1 className="text-3xl font-bold text-slate-900 mt-1">
-              {product.name}
-            </h1>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-black uppercase text-sm tracking-wide">
+                  {product.company}
+                </p>
+                <h1 className="text-3xl font-bold text-slate-900 mt-1">
+                  {product.name}
+                </h1>
+              </div>
+              <button
+                onClick={handleWishlist}
+                className="w-11 h-11 shrink-0 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center hover:scale-110 transition cursor-pointer"
+              >
+                {isWishlisted ? (
+                  <FaHeart className="text-red-500 text-xl" />
+                ) : (
+                  <FaRegHeart className="text-gray-500 text-xl" />
+                )}
+              </button>
+            </div>
              {zoom && <div 
                 className='absolute top-8 left-[52%] w-150 h-150 border rounded-lg shadow-xl bg-white z-50' style = {{backgroundImage : `url(${selectedImage})`,
                backgroundPosition: `${position.x}% ${position.y}%`,

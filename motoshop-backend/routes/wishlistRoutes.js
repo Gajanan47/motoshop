@@ -11,5 +11,6 @@ const {verifyUser} = require("../middleware/authMiddleware")
 router.post("/", verifyUser, addToWishlist);
 router.get("/", verifyUser, getWishlist);
 router.delete("/:productId", verifyUser, removeFromWishlist);
+router.get("/wishlist", verifyUser, getWishlist)
 
 module.exports = router;

@@ -55,7 +55,7 @@ const ChatBot = () => {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[60]">
+    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-60">
       {isOpen && (
         <section className="mb-3 w-[calc(100vw-2rem)] max-w-sm overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/20">
           <div className="flex items-center justify-between bg-slate-950 px-4 py-3 text-white">

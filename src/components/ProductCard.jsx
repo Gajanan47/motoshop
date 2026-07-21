@@ -1,8 +1,7 @@
-import { useState } from "react";
 import { useCart } from "../context/CartContext"
+import { useWishlist } from "../context/WishlistContext"
 import { useNavigate } from "react-router-dom"
 import { FaHeart, FaRegHeart } from "react-icons/fa";
-import { addWishlist, removeWishlist } from "../api/wishlist";
 const badgeStyle = {
   new: "bg-green-500/10 text-green-400 border border-green-500/30",
   hot: "bg-orange-500/10 text-orange-400 border border-orange-500/30",
@@ -11,27 +10,17 @@ const badgeStyle = {
 
 export default function ProductCard({ product }) {
   const { addToCart, cart, removeFromCart } = useCart()
-  const [isWishlisted, setIsWishlisted] = useState(product.isWishlisted || false)
+  const { wishlistIds, toggleWishlist } = useWishlist()
+  const isWishlisted = wishlistIds.has(product.id)
 
   const cartItem = cart.find((item) => item.id === product.id)
   const qty = cartItem ? cartItem.qty : 0
   const navigate = useNavigate()
   const stars = "★".repeat(Math.round(product.rating)) +
     "☆".repeat(5 - Math.round(product.rating))
-  const handleWishlist = async (e) => {
+  const handleWishlist = (e) => {
     e.stopPropagation();
-
-    try {
-      if (isWishlisted) {
-        await removeWishlist(product.id);
-        setIsWishlisted(false);
-      } else {
-        await addWishlist(product.id);
-        setIsWishlisted(true);
-      }
-    } catch (err) {
-      console.error(err);
-    }
+    toggleWishlist(product);
   };
 
 

@@ -213,6 +213,15 @@ export default function Navbar() {
             </button>
           )}
         </div>
+         {name && (
+          <button
+            onClick={() => navigate("/wishlist")}
+            className="flex items-center gap-1 sm:gap-1.5 sm:px-3 px-2 py-1.5 text-sm text-black-400 border border-slate-200 rounded-md hover:border-orange-500 hover:text-orange transition cursor-pointer shrink-0"
+          >
+            <span>♥</span>
+            <span className="hidden xs:inline">Wishlist</span>
+          </button>
+        )}
 
         <button
           onClick={() => setIsCartOpen(true)}
