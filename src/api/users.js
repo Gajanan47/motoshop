@@ -1,4 +1,4 @@
-import userAPI from "./axios"
+import {userAPI} from "./axios"
 
 export const fetchMe = ()=> userAPI.get("/users/me")
 

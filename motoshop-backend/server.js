@@ -25,6 +25,7 @@ const userRoutes = require('./routes/userRoutes')
 const chatbotRoutes = require('./routes/chatbotRoutes')
 const reviewRoutes = require('./routes/reviewRoutes')
 const wishlistRoutes = require("./routes/wishlistRoutes");
+const notificationRoutes = require("./routes/notificationRoutes")
 app.use("/api/products", productRoutes)
 app.use("/api/orders", orderRoutes)
 app.use("/api/admin", adminRoutes)
@@ -34,6 +35,7 @@ app.use("/invoices", express.static(path.join(__dirname, "invoices")))
 app.use("/api/chatbot", require("./routes/chatbotRoutes"))
 app.use("/api/reviews", reviewRoutes)
 app.use("/api/wishlist",wishlistRoutes);
+app.use("/api/notifications", notificationRoutes)
 app.get('/', (req, res) => {
     res.json({ message: "MotoShop backend is running" })
 })

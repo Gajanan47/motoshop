@@ -4,9 +4,11 @@ import {
   fetchProducts,
   addProduct,
   updateProduct,
-  deleteProduct
+  deleteProduct,
+  generateProductDescription
 } from "../api/products"
 import { fetchOrders, updateOrderStatus } from "../api/orders"
+import NotificationBell from "../components/NotificationBell"
 
 const emptyForm = {
   name: "", company: "", type: 2, cc: 0,
@@ -32,6 +34,33 @@ export default function AdminDashboard() {
   const [editingProduct, setEditingProduct] = useState(null)
   const [form, setForm] = useState(emptyForm)
   const [imageFiles, setImageFiles] = useState([])
+  const [generatingDescription, setGeneratingDescription] = useState(false)
+  const [generateError, setGenerateError] = useState("")
+
+  async function handleGenerateDescription() {
+    if (!form.name || !form.company) {
+      setGenerateError("Enter at least the name and company first")
+      return
+    }
+    setGenerateError("")
+    setGeneratingDescription(true)
+    try {
+      const res = await generateProductDescription({
+        name: form.name,
+        company: form.company,
+        type: form.type,
+        cc: form.cc,
+        fuel: form.fuel,
+        use_case: form.use_case,
+        price: form.price,
+      })
+      setForm((prev) => ({ ...prev, description: res.data.description }))
+    } catch (err) {
+      setGenerateError(err.response?.data?.message || "Failed to generate description")
+    } finally {
+      setGeneratingDescription(false)
+    }
+  }
   const [formLoading, setFormLoading] = useState(false)
   const [message, setMessage] = useState("")
   const [popupMsg, setPopupMsg] = useState("")
@@ -334,6 +363,9 @@ export default function AdminDashboard() {
         </h1>
         <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto border-t sm:border-t-0 pt-2 sm:pt-0">
           <div className="flex gap-2">
+            {localStorage.getItem("adminToken") && (
+              <NotificationBell role="admin" />
+            )}
             <button
               onClick={refreshAll}
               className="text-xs sm:text-sm px-3 py-1.5 border border-slate-200 rounded-lg text-slate-500 hover:border-orange-400 hover:text-orange-500 transition cursor-pointer"
@@ -588,35 +620,35 @@ export default function AdminDashboard() {
                 </div>
               </div>
             )}
-            
+
 
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-4 border-t border-slate-200 text-xs">
-  
-  {/* Left Column: Context Tracker (Centered on mobile, left-aligned on PC) */}
-  <div className="text-slate-500 font-medium text-center sm:text-left order-2 sm:order-1">
-    Page <span className="font-bold text-slate-900">{currentProductsPage}</span> of {Math.max(1, Math.ceil(filteredProducts.length / itemsPerPage))}
-  </div>
 
-  {/* Right Column: Button Group (Stays together as a single block) */}
-  <div className="flex items-center gap-2 w-full sm:w-auto justify-center sm:justify-end order-1 sm:order-2">
-    <button
-      className="px-3 py-1.5 border border-slate-200 bg-white rounded-lg text-slate-600 hover:border-orange-400 hover:text-orange-500 disabled:opacity-40 disabled:hover:border-slate-200 disabled:hover:text-slate-600 font-medium transition cursor-pointer"
-      onClick={() => setCurrentProductsPage(prev => Math.max(prev - 1, 1))} disabled={currentProductsPage === 1}
-    >
-      ← Prev
-    </button>
-   {/* ✅ FIXED VERSION: */}
-<button
-  className="px-3 py-1.5 border border-slate-200 bg-white rounded-lg text-slate-600 hover:border-orange-400 hover:text-orange-500 disabled:opacity-40 disabled:hover:border-slate-200 disabled:hover:text-slate-600 font-medium transition cursor-pointer"
-  onClick={() => setCurrentProductsPage(prev => Math.min(prev + 1, Math.ceil(filteredProducts.length / itemsPerPage)))} 
-  disabled={currentProductsPage >= Math.max(1, Math.ceil(filteredProducts.length / itemsPerPage))}
->
-  Next →
-</button>
-  </div>
-</div>
-         </div>
- )}
+              {/* Left Column: Context Tracker (Centered on mobile, left-aligned on PC) */}
+              <div className="text-slate-500 font-medium text-center sm:text-left order-2 sm:order-1">
+                Page <span className="font-bold text-slate-900">{currentProductsPage}</span> of {Math.max(1, Math.ceil(filteredProducts.length / itemsPerPage))}
+              </div>
+
+              {/* Right Column: Button Group (Stays together as a single block) */}
+              <div className="flex items-center gap-2 w-full sm:w-auto justify-center sm:justify-end order-1 sm:order-2">
+                <button
+                  className="px-3 py-1.5 border border-slate-200 bg-white rounded-lg text-slate-600 hover:border-orange-400 hover:text-orange-500 disabled:opacity-40 disabled:hover:border-slate-200 disabled:hover:text-slate-600 font-medium transition cursor-pointer"
+                  onClick={() => setCurrentProductsPage(prev => Math.max(prev - 1, 1))} disabled={currentProductsPage === 1}
+                >
+                  ← Prev
+                </button>
+                {/* ✅ FIXED VERSION: */}
+                <button
+                  className="px-3 py-1.5 border border-slate-200 bg-white rounded-lg text-slate-600 hover:border-orange-400 hover:text-orange-500 disabled:opacity-40 disabled:hover:border-slate-200 disabled:hover:text-slate-600 font-medium transition cursor-pointer"
+                  onClick={() => setCurrentProductsPage(prev => Math.min(prev + 1, Math.ceil(filteredProducts.length / itemsPerPage)))}
+                  disabled={currentProductsPage >= Math.max(1, Math.ceil(filteredProducts.length / itemsPerPage))}
+                >
+                  Next →
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         {popupOpen && (
           <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-5 pointer-events-none">
             <div className="bg-white rounded-2xl shadow-2xl px-6 py-5 max-w-sm w-full text-center">
@@ -831,15 +863,31 @@ export default function AdminDashboard() {
 
               {/* Description */}
               <div>
-                <label className="text-xs text-slate-500 font-medium block mb-1">Description</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs text-slate-500 font-medium block">Description</label>
+                  <button
+                    type="button"
+                    onClick={handleGenerateDescription}
+                    disabled={generatingDescription}
+                    className="text-xs font-medium text-orange-600 hover:text-orange-700 disabled:text-slate-400 disabled:cursor-not-allowed transition cursor-pointer"
+                  >
+                    {generatingDescription ? "Generating..." : "✨ Generate with AI"}
+                  </button>
+                </div>
                 <textarea
                   name="description"
                   value={form.description}
                   onChange={handleChange}
-                  placeholder="Write product description..."
+                  placeholder="Write product description, or fill the fields above and click Generate with AI..."
                   rows={3}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-400 transition resize-none"
                 />
+                {generateError && (
+                  <p className="text-xs text-red-500 mt-1">{generateError}</p>
+                )}
+                <p className="text-[11px] text-slate-400 mt-1">
+                  AI-generated text is a starting point — review and edit before saving.
+                </p>
               </div>
 
               {/* Images */}

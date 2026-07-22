@@ -1,4 +1,4 @@
-import userAPI from "./axios";
+import {userAPI} from "./axios";
 
 export const getReviews = (productId) =>  userAPI.get(`/reviews/${productId}`)
 

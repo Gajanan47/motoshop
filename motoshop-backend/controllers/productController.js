@@ -1,5 +1,104 @@
 const db = require("../config/db")
 
+const geminiApiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY
+const geminiModel = "gemini-3.5-flash"
+
+const getVehicleType = (type) => {
+  if (String(type) === "2") return "Two-wheeler"
+  if (String(type) === "4") return "Four-wheeler"
+  return "Vehicle"
+}
+
+const generateDescription = async (req, res) => {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 20000)
+
+  try {
+    const { name, company, type, cc, fuel, use_case, price } = req.body
+
+    if (!name || !company) {
+      return res.status(400).json({
+        success: false,
+        message: "Name and company are required to generate a description"
+      })
+    }
+
+    if (!geminiApiKey) {
+      return res.status(500).json({ success: false, message: "Gemini API key is missing" })
+    }
+
+    const details = [
+      `${name} is a ${getVehicleType(type)} made by ${company}.`,
+      cc ? `It has a ${cc}cc engine.` : null,
+      fuel ? `It runs on ${fuel}.` : null,
+      use_case ? `It's best suited for ${use_case} use.` : null,
+      price ? `It's priced around Rs ${price} lakh.` : null,
+    ].filter(Boolean).join(" ")
+
+    const prompt = `
+Write a product description for an e-commerce vehicle listing.
+
+Facts about the vehicle:
+${details}
+
+Rules:
+- Output ONLY the final description text — nothing else.
+- Do not repeat these instructions, do not explain your reasoning, do not restate the facts as a list.
+- Do not use labels like "Name:" or "Brand:", markdown, asterisks, or bullet points.
+- Write 2-3 flowing sentences, like real ad copy a shopper would read on a product page.
+- Do not invent specifications, features, or numbers beyond what's given above.
+
+Example of the style and format expected (different vehicle, for reference only):
+"The Hero Splendor Plus is a dependable commuter bike built for everyday city rides. With a fuel-efficient 97cc engine, it delivers smooth performance at an accessible price point, making it a practical choice for daily commuting."
+
+Now write the description for the vehicle described above, in that same style:
+`
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${geminiApiKey}`,
+      {
+        method: "POST",
+        signal: controller.signal,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          generationConfig: { temperature: 0.6, maxOutputTokens: 200 },
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+        }),
+      }
+    )
+
+    const data = await response.json()
+    console.log(response)
+    console.log("data",data)
+    if (!response.ok) {
+      return res.status(response.status).json({
+        success: false,
+        message: data.error?.message || "Gemini request failed",
+      })
+    }
+
+    const rawDescription = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim()
+      || "Could not generate a description right now."
+
+    // strip stray markdown asterisks, leading labels, or wrapping quotes the model might still add
+    const description = rawDescription
+      .replace(/\*\*/g, "")
+      .replace(/^["']|["']$/g, "")
+      .replace(/^(Name|Description)\s*:\s*/i, "")
+      .trim()
+
+    res.json({ success: true, description })
+  } catch (err) {
+    console.error("Description generation error:", err)
+    if (err.name === "AbortError") {
+      return res.status(504).json({ success: false, message: "Gemini took too long to respond. Please try again." })
+    }
+    res.status(500).json({ success: false, message: "Failed to generate description" })
+  } finally {
+    clearTimeout(timeout)
+  }
+}
+
 const getAllProducts = async(req,res)=>{
     try{
         // instead of SELECT * FROM products
@@ -57,7 +156,7 @@ function buildImages(req) {
 const addProduct = async (req, res) => {
   try {
     const { name, company, type, cc, fuel, use_case,
-            price, rating, reviews, badge } = req.body
+            price, rating, reviews, badge, description } = req.body
     const images = buildImages(req)
     // images = array of URLs from frontend e.g. ["url1", "url2"]
 
@@ -69,10 +168,10 @@ const addProduct = async (req, res) => {
     const image = images?.[0] || null
     const [result] = await db.query(
       `INSERT INTO products
-        (name, company, type, cc, fuel, use_case, price, rating, reviews, badge,image)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)`,
+        (name, company, type, cc, fuel, use_case, price, rating, reviews, badge, description, image)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [name, company, type, cc || 0, fuel, use_case,
-       price, rating || 0, reviews || 0, badge || "", image]
+       price, rating || 0, reviews || 0, badge || "", description || "", image]
     )
 
     const productId = result.insertId
@@ -100,7 +199,7 @@ const updateProduct = async (req, res) => {
   try {
     const { id } = req.params
     const { name, company, type, cc, fuel,
-            use_case, price, rating, reviews, badge } = req.body
+            use_case, price, rating, reviews, badge, description } = req.body
 
     const [existing] = await db.query("SELECT * FROM products WHERE id = ?", [id])
     if (existing.length === 0)
@@ -111,9 +210,10 @@ const updateProduct = async (req, res) => {
     await db.query(
       `UPDATE products SET
         name=?, company=?, type=?, cc=?, fuel=?,
-        use_case=?, price=?, rating=?, reviews=?, badge=?, image=?
+        use_case=?, price=?, rating=?, reviews=?, badge=?, description=?, image=?
        WHERE id=?`,
-      [name, company, type, cc, fuel, use_case, price, rating, reviews, badge, images?.[0] || existing[0].image, id]
+      [name, company, type, cc, fuel, use_case, price, rating, reviews, badge,
+       description ?? existing[0].description, images?.[0] || existing[0].image, id]
     )
 
     // replace old images with new ones
@@ -186,5 +286,6 @@ module.exports = {
   addProduct,
   updateProduct,
   deleteProduct,
-  getSimilarProducts
+  getSimilarProducts,
+  generateDescription
 }

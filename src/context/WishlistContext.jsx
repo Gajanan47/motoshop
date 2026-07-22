@@ -33,15 +33,15 @@ export function WishlistProvider ({children}) {
     }, [refreshWishlist])
 
     const toggleWishlist = async (product) => {
-  const wasWishlisted = wishlistIds.has(product.id)
+    const wasWishlisted = wishlistIds.has(product.id)
 
   // update local state immediately so every card reflects it right away
-  setwishlistIds((prev) => {
+    setwishlistIds((prev) => {
     const next = new Set(prev)
     wasWishlisted ? next.delete(product.id) : next.add(product.id)
     return next
   })
-  setwishlistProducts((prev) =>
+    setwishlistProducts((prev) =>
     wasWishlisted ? prev.filter((p) => p.id !== product.id) : [...prev, product]
   )
 

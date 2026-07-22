@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react'
 import {useNavigate, useParams} from 'react-router-dom'
-import {fetchOrderById, updateOrderStatus } from '../api/orders.js'
+import {fetchOrderById, fetchOrderInvoice, emailOrderInvoice, updateOrderStatus } from '../api/orders.js'
 
 const statusColors = {
      Confirmed:  "bg-blue-100 text-blue-600",
@@ -17,6 +17,7 @@ const OrderDetails = () => {
     const [error, setError] = useState("")
     const [popupOpen, setPopupOpen] = useState(false)
     const [popupMsg, setPopupMsg] = useState("")
+    const [invoiceLoading, setInvoiceLoading] = useState(false)
 const navigate = useNavigate()
     useEffect(() => {
       loadOrder()
@@ -33,6 +34,38 @@ const navigate = useNavigate()
         }finally{
             setLoading(false)
         }
+    }
+    const showPopup = (message) => {
+      setPopupMsg(message)
+      setPopupOpen(true)
+      setTimeout(() => setPopupOpen(false), 3000)
+    }
+    async function handleInvoiceDownload(){
+      setInvoiceLoading(true)
+      try {
+        const response = await fetchOrderInvoice(id)
+        const url = window.URL.createObjectURL(new Blob([response.data], { type: "application/pdf" }))
+        const link = document.createElement("a")
+        link.href = url
+        link.download = `invoice-${order.order_id.replace("#", "")}.pdf`
+        link.click()
+        window.URL.revokeObjectURL(url)
+      } catch (err) {
+        showPopup(err.response?.data?.message || "Invoice is not available")
+      } finally {
+        setInvoiceLoading(false)
+      }
+    }
+    async function handleInvoiceEmail(){
+      setInvoiceLoading(true)
+      try {
+        const response = await emailOrderInvoice(id)
+        showPopup(response.data.message)
+      } catch (err) {
+        showPopup(err.response?.data?.message || "Unable to send invoice email")
+      } finally {
+        setInvoiceLoading(false)
+      }
     }
     async function handleStatusChange(newStatus){
         try{
@@ -217,6 +250,30 @@ const navigate = useNavigate()
               <span>Total</span>
               <span className="text-orange-500">₹{grandTotal.toFixed(2)}L</span>
             </div>
+          </div>
+        </div>
+
+        {/* Invoice */}
+        <div className="bg-white rounded-2xl shadow-sm p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h3 className="font-semibold text-slate-900">Invoice</h3>
+            <p className="text-sm text-slate-500 mt-1">PDF invoice for {order.order_id}. It is sent automatically with the order confirmation email.</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={handleInvoiceDownload}
+              disabled={invoiceLoading}
+              className="text-sm px-3 py-2 border border-slate-200 rounded-lg text-slate-700 hover:border-orange-400 hover:text-orange-500 disabled:opacity-50 transition cursor-pointer"
+            >
+              {invoiceLoading ? "Please wait..." : "Download PDF"}
+            </button>
+            <button
+              onClick={handleInvoiceEmail}
+              disabled={invoiceLoading}
+              className="text-sm px-3 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg disabled:opacity-50 transition cursor-pointer"
+            >
+              Email Invoice
+            </button>
           </div>
         </div>
 

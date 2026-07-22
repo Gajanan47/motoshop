@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useCart } from "../context/CartContext"
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom"
 import {fetchProducts} from '../api/products'
+import NotificationBell from './NotificationBell'
 export default function Navbar() {
   const { cartCount, setIsCartOpen } = useCart()
   const [isAccountOpen, setIsAccountOpen] = useState(false)
@@ -163,6 +164,9 @@ export default function Navbar() {
 
       {/* Right — Account + Cart */}
       <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        {localStorage.getItem("userToken") && (
+          <NotificationBell role="user" />
+        )}
         <div className="relative">
           {name ? (
             <div onMouseEnter={() => setIsAccountOpen(true)} onMouseLeave={() => setIsAccountOpen(false)}>

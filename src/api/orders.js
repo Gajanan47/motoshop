@@ -11,4 +11,10 @@ export const fetchMyOrders = () => userAPI.get("/orders/my-orders")
 export const updateOrderStatus = (id, status) =>
   adminAPI.put(`/orders/${id}/status`, { status })
 
+export const fetchOrderInvoice = (id) =>
+  adminAPI.get(`/orders/${id}/invoice`, { responseType: "blob" })
+
+export const emailOrderInvoice = (id) =>
+  adminAPI.post(`/orders/${id}/invoice/email`)
+
 export const cancelOrder = (id) => userAPI.put(`/orders/${id}/cancel`)

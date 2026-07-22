@@ -6,7 +6,8 @@ const {
   addProduct,
   updateProduct,
   deleteProduct,
-  getSimilarProducts
+  getSimilarProducts,
+  generateDescription
 } = require("../controllers/productController")
 const { upload } = require("../middleware/uploadMiddleware")
 
@@ -19,6 +20,7 @@ router.get("/:id", getProductById)
 
 // PROTECTED routes — admin only
 router.post("/", verifyAdmin, upload.array("images", 5), addProduct)
+router.post("/generate-description", verifyAdmin, generateDescription)
 router.put("/:id", verifyAdmin, upload.array("images", 5), updateProduct)
 router.delete("/:id", verifyAdmin, deleteProduct)
 
