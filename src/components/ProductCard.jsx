@@ -1,7 +1,9 @@
 import { useCart } from "../context/CartContext"
 import { useWishlist } from "../context/WishlistContext"
+import { useCompare } from "../context/CompareContext"
 import { useNavigate } from "react-router-dom"
 import { FaHeart, FaRegHeart } from "react-icons/fa";
+import { MdCompareArrows } from "react-icons/md";
 const badgeStyle = {
   new: "bg-green-500/10 text-green-400 border border-green-500/30",
   hot: "bg-orange-500/10 text-orange-400 border border-orange-500/30",
@@ -11,7 +13,9 @@ const badgeStyle = {
 export default function ProductCard({ product }) {
   const { addToCart, cart, removeFromCart } = useCart()
   const { wishlistIds, toggleWishlist } = useWishlist()
+  const { isInCompare, toggleCompare } = useCompare()
   const isWishlisted = wishlistIds.has(product.id)
+  const isComparing = isInCompare(product.id)
 
   const cartItem = cart.find((item) => item.id === product.id)
   const qty = cartItem ? cartItem.qty : 0
@@ -21,6 +25,10 @@ export default function ProductCard({ product }) {
   const handleWishlist = (e) => {
     e.stopPropagation();
     toggleWishlist(product);
+  };
+  const handleCompare = (e) => {
+    e.stopPropagation();
+    toggleCompare(product);
   };
 
 
@@ -50,6 +58,15 @@ export default function ProductCard({ product }) {
             ) : (
               <FaRegHeart className="text-gray-500 text-lg" />
             )}
+          </button>
+          <button
+            onClick={handleCompare}
+            title={isComparing ? "Remove from compare" : "Add to compare"}
+            className={`absolute top-2 right-13 w-9 h-9 rounded-full shadow-md flex items-center justify-center hover:scale-110 transition cursor-pointer ${
+              isComparing ? "bg-orange-500 text-white" : "bg-white text-gray-500"
+            }`}
+          >
+            <MdCompareArrows className="text-lg" />
           </button>
         </div>
 

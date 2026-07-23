@@ -20,6 +20,10 @@ import ReAuth from "./pages/ReAuth"
 import ChatBot from "./components/ChatBot"
 import WishList from "./pages/WishList"
 import { WishlistProvider } from "./context/WishlistContext"
+import { CompareProvider } from "./context/CompareContext"
+import Compare from "./pages/Compare"
+import CompareTray from "./components/CompareTray"
+
 function AppContent() {
   const location = useLocation()
 
@@ -46,10 +50,12 @@ function AppContent() {
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
         <Route path="/wishlist" element={<ProtectedRoute><Navbar /><WishList /></ProtectedRoute>} />
+        <Route path="/compare" element={<><Navbar /><Compare /></>} />
         <Route path="/admin/orders/:id" element={<AdminProtectedRoute><OrderDetails /></AdminProtectedRoute>} />
       </Routes>
 
       {showChatBot && <ChatBot />}
+      {showChatBot && <CompareTray />}
       <CartModal />
     </>
   )
@@ -58,13 +64,14 @@ function AppContent() {
 function App() {
   return (
     <WishlistProvider>
-      <CartProvider>
-      <BrowserRouter>
-        <AppContent />
-      </BrowserRouter>
-    </CartProvider>
+      <CompareProvider>
+        <CartProvider>
+          <BrowserRouter>
+            <AppContent />
+          </BrowserRouter>
+        </CartProvider>
+      </CompareProvider>
     </WishlistProvider>
-    
   )
 }
 

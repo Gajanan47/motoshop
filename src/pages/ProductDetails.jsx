@@ -7,11 +7,14 @@ import { getSimilarProducts } from '../api/products'
 import { useNavigate } from 'react-router-dom'
 import ReviewSection from '../components/ReviewSection'
 import { FaHeart, FaRegHeart } from "react-icons/fa"
+import { MdCompareArrows } from "react-icons/md"
 import { useWishlist } from "../context/WishlistContext"
+import { useCompare } from "../context/CompareContext"
 const ProductDetails = () => {
   const { id } = useParams()
   const { addToCart, cart, removeFromCart } = useCart()
   const { wishlistIds, toggleWishlist } = useWishlist()
+  const { isInCompare, toggleCompare } = useCompare()
 
   const [product, setProduct] = useState()
   const [selectedImage, setSelectedImage] = useState("")
@@ -22,6 +25,7 @@ const ProductDetails = () => {
   const cartItem = product ? cart.find((item) => item.id === product.id) : null
   const qty = cartItem ? cartItem.qty : 0
   const isWishlisted = product ? wishlistIds.has(product.id) : false
+  const isComparing = product ? isInCompare(product.id) : false
   const navigate = useNavigate()
   useEffect(() => {
     async function load() {
@@ -121,16 +125,29 @@ const ProductDetails = () => {
                   {product.name}
                 </h1>
               </div>
-              <button
-                onClick={handleWishlist}
-                className="w-11 h-11 shrink-0 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center hover:scale-110 transition cursor-pointer"
-              >
-                {isWishlisted ? (
-                  <FaHeart className="text-red-500 text-xl" />
-                ) : (
-                  <FaRegHeart className="text-gray-500 text-xl" />
-                )}
-              </button>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={() => toggleCompare(product)}
+                  title={isComparing ? "Remove from compare" : "Add to compare"}
+                  className={`w-11 h-11 rounded-full border shadow-sm flex items-center justify-center hover:scale-110 transition cursor-pointer ${
+                    isComparing
+                      ? "bg-orange-500 border-orange-500 text-white"
+                      : "bg-white border-slate-200 text-gray-500"
+                  }`}
+                >
+                  <MdCompareArrows className="text-xl" />
+                </button>
+                <button
+                  onClick={handleWishlist}
+                  className="w-11 h-11 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center hover:scale-110 transition cursor-pointer"
+                >
+                  {isWishlisted ? (
+                    <FaHeart className="text-red-500 text-xl" />
+                  ) : (
+                    <FaRegHeart className="text-gray-500 text-xl" />
+                  )}
+                </button>
+              </div>
             </div>
              {zoom && <div 
                 className='absolute top-8 left-[52%] w-150 h-150 border rounded-lg shadow-xl bg-white z-50' style = {{backgroundImage : `url(${selectedImage})`,

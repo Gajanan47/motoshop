@@ -67,28 +67,33 @@ const placeOrder = async (req, res) => {
     }
     const invoiceUrl = `/invoices/${invoiceFileName}`
 
-    res.status(201).json({
+    
+
+    try {
+      await Promise.all([
+        createNotification({
+          recipientRole: 'user',
+          userId,
+          title: "Order Confirmed",
+          message: `Your order ${orderId} has been confirmed.`
+        }),
+        createNotification({
+          recipientRole: 'admin',
+          title: "Order Confirmed",
+          message: `${customerName} has confirmed ${orderId} order.`
+        }),
+      ])
+      
+    } catch (notifyError) {
+      console.log("Notification creation failed:", notifyError.message)
+      // order already succeeded and response already sent — don't let this crash anything
+    }
+res.status(201).json({
       success: true,
       message: "Order placed successfully",
       orderId,
       invoiceUrl
     })
-
-    await Promise.all([
-      createNotification({
-        recipientRole: 'user',
-        userId,
-        title: "Order Confirmed",
-        message: `Your order ${order_id} has been confirmed.`
-      }),
-      createNotification({
-        recipientRole: 'admin',
-        title: "Order Confirmed",
-        message: `Your order ${order_id} has been confirmed.`
-      }),
-
-    ])
-
 
   } catch (error) {
     res.status(500).json({ success: false, message: error.message })
@@ -209,21 +214,25 @@ const updateOrderStatus = async (req, res) => {
     )
     const order = existing[0]
     res.json({ success: true, message: "Order status updated" })
-    await Promise.all([
-      createNotification({
-        recipientRole: "user",
-        userId: order.user_id,
-        orderId: order.id,
-        title: "Order status updated",
-        message: `Your order ${order.order_id} is now ${status}.`
-      }),
-      createNotification({
-        recipientRole: "admin",
-        orderId: order.id,
-        title: "Order status updated",
-        message: `Order ${order.order_id} was changed to ${status}.`
-      })
-    ])
+    try {
+      await Promise.all([
+        createNotification({
+          recipientRole: "user",
+          userId: order.user_id,
+          orderId: order.id,
+          title: "Order status updated",
+          message: `Your order ${order.order_id} is now ${status}.`
+        }),
+        createNotification({
+          recipientRole: "admin",
+          orderId: order.id,
+          title: "Order status updated",
+          message: `Order ${order.order_id} was changed to ${status}.`
+        })
+      ])
+    } catch (notifyError) {
+      console.log("Notification creation failed:", notifyError.message)
+    }
     Promise.all([
       sendCustomerStatusChangeEmail(order.customer_email, order.customer_name, {
         orderId: order.order_id,
@@ -280,24 +289,29 @@ const cancelOrder = async (req, res) => {
     await db.query(
       'UPDATE orders SET status = ? WHERE id=?  ', ['Cancelled', req.params.id]
     )
-    res.json({ success: true, message: "Order has been cancelled" })
+    
 
-    await Promise.all([
-      createNotification({
-        recipientRole: 'user',
-        userId: req.user.id,
-        orderId: order_id,
-        title: "Order Cancelled",
-        message: `You cancelled order ${order.order_id}.`
-      }),
-      createNotification({
-        recipientRole: 'admin',
-        orderId: order_id,
-        title: "Order Cancelled",
-        message: ` ${order.customer_name} has cancelled the ${order.order_id} order. `
-      }),
+    try {
+      await Promise.all([
+        createNotification({
+          recipientRole: 'user',
+          userId: req.user.id,
+          orderId: order.id,
+          title: "Order Cancelled",
+          message: `You cancelled order ${order.order_id}.`
+        }),
+        createNotification({
+          recipientRole: 'admin',
+          orderId: order.id,
+          title: "Order Cancelled",
+          message: ` ${order.customer_name} has cancelled the ${order.order_id} order. `
+        }),
 
-    ])
+      ])
+      res.json({ success: true, message: "Order has been cancelled" })
+    } catch (notifyError) {
+      console.log("Notification creation failed:", notifyError.message)
+    }
 
   } catch (err) {
     res.status(500).json({ success: false, message: err.message })
